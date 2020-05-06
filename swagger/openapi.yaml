@@ -1,0 +1,61 @@
+openapi: 3.0.1
+info:
+  title: Rule-Based Chatbot (COVID-19 Topic)
+  description: This chatbot is designed to answer questions about COVID-19 topic.
+    It is a part of the [Health Safety Army](https://github.com/unsw-cse-soc/HealthSafetyArmy)
+    platform.
+  version: 1.0.1
+  contact:
+    name: API Development Team
+    url: 'https://github.com/unsw-cse-soc/HealthSafetyArmy'
+    email: shayane.zamani@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+- url: http://localhost:5050
+paths:
+  /ask:
+    post:
+      tags:
+      - Endpoint
+      summary: Ask question
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - From
+                - Body
+              properties:
+                From:
+                  type: string
+                  description: id of user - sessioning purpose
+                  default: 1
+                Body:
+                  type: string
+                  description: User text message
+                  default: Hi
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  answer:
+                    type: string
+                  suggestion:
+                    type: boolean
+                  confused:
+                    type: boolean
+                  more_details:
+                    type: array
+                    items:
+                      type: string
+                      example: 'link to webpage, video, document, etc.'
+      x-codegen-request-body-name: body
+components: {}

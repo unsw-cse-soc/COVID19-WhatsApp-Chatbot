@@ -1,0 +1,27 @@
++ [*](talk to human|want [to] talk [to] human|talk [(to|with)] [an] expert|[(handover|give)] [the] conversation [to] human)
+- ^Human-Handover-Start=Sure, I am passing the conversation to one of our team members 👨🏻‍💻 {topic=user_initiate_handover}
+
+> topic user_initiate_handover
+
+  + [*](stop [the] [human] handover|[to] talk [to] [you] covy)[*]
+  - ^Human-Handover-Finish=Heya! I'm back again, *Covy* 👋😎️ is here. {topic=random}
+
+  + *
+  - ^Human-Handover-Continue=<star>
+
+< topic
+
++ (connect me to user [*]|happy to talk [(to|with)] user [*]|give me [the] conversation [control] for user [*]|[*] talk to [the] user [*])
+- ^Human-Talk-Start=Sure, you can now talk to the user=<star> {topic=human_accept_handover}
+
+> topic human_accept_handover
+
+  + (please stop [the] [human] handover for user [*]| stop [the] [human] handover for user [*]|back to [you] covy for user [*])
+  - ^Human-Talk-Finish=I'm back again, *Covy* 👋😎️ is here.=<star> {topic=random}
+
+  + *
+  - ^Human-Talk-Continue=<star>
+
+< topic
+
+

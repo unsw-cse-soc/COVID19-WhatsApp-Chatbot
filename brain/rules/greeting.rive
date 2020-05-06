@@ -1,0 +1,14 @@
++ (hi|hey|hello|howdy|heeya*|heya*)
+- Hi 👋☺️\n
+^ I'm *Covy* from Australia 🇦🇺🦘🐨\n
+^ I know a lot about _Coronavirus_ 🦠😷 and I can help you learn more about it!\n
+^ It might be a scary virus 👀, but we can beat it together! 💪\n\n
+^ You can ask me your questions️ in *English* 🇬🇧, but soon I'll be able to talk in other languages 🤓\n
+
++ (hi covy|hey covy|hello covy|howdy covy)[*]
+- Hi 👋️, I'm glad you are back ☺️\n
+
++ (how are you|hows everything)
+- Good, thanks 😙
+- I'm fine, happy! 😋
+
