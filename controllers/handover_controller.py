@@ -16,7 +16,6 @@ logger.addHandler(log_file_handler)
 config = configparser.ConfigParser(inline_comment_prefixes="#")
 config.read(os.path.join(os.path.dirname(__file__), "..", "config.ini"))
 twilio_settings = config["TWILIO"]
-whatsapp_settings = config["WHATSAPP"]
 
 try:
     logger.info("Loading config settings")
@@ -29,13 +28,9 @@ try:
     else:
         twilio_auth_token = twilio_settings["auth_token"]
     if "phone_number" not in twilio_settings or twilio_settings["phone_number"] == "":
-        raise Exception("Twilio sandbox phone number for conversation handover purposes is not defined.")
+        raise Exception("Twilio sandbox phone number is not defined.")
     else:
         twilio_sandbox_phone_number = twilio_settings["phone_number"]
-    if "phone_number" not in whatsapp_settings or whatsapp_settings["phone_number"] == "":
-        raise Exception("Human phone number for conversation handover purposes is not defined.")
-    else:
-        human_phone_number = whatsapp_settings["phone_number"]
     logger.info("Config settings loaded successfully")
     twilio_client = Client(twilio_account_sid, twilio_auth_token)
 
@@ -43,28 +38,16 @@ except Exception as e:
     logger.error(str(e))
     exit()
 
-def start_handover(user_message):
+def notify_handover_volunteer(message, volunteer_number):
     message = twilio_client.messages.create(
-        body=user_message,
+        body=message,
         from_="whatsapp:{}".format(twilio_sandbox_phone_number),
-        to="whatsapp:{}".format(human_phone_number)
+        to="whatsapp:{}".format(volunteer_number)
     )
 
-def user_continue_handover(user_message, human_response_format):
+def notify_user(message, user_id):
     message = twilio_client.messages.create(
-        body=user_message,
-        from_="whatsapp:{}".format(twilio_sandbox_phone_number),
-        to="whatsapp:{}".format(human_phone_number)
-    )
-    message = twilio_client.messages.create(
-        body=human_response_format,
-        from_="whatsapp:{}".format(twilio_sandbox_phone_number),
-        to="whatsapp:{}".format(human_phone_number)
-    )
-
-def notify_user(human_message, user_id):
-    message = twilio_client.messages.create(
-        body=human_message,
+        body=message,
         to="whatsapp:{}".format("+" + user_id if not user_id.startswith("+") else user_id),
         from_ = "whatsapp:{}".format(twilio_sandbox_phone_number)
     )

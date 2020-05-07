@@ -255,12 +255,13 @@ def add_user_to_blacklist(phone_number):
     """
     db = mongo_client.COVIDChatbot_Misconduct
     user_details = {
-        "phone_number": phone_number,
+        "phone_number": "{}".format("+" + phone_number if not phone_number.startswith("+") else phone_number),
     }
     collection = db.COVIDChatbot_Misconduct.insert_one(user_details)
     if str(collection.inserted_id) != "":  # if the request is successfully added to the database
         return str(collection.inserted_id)
     return False
+
 
 def check_user_in_blacklist(phone_number):
     """
@@ -269,7 +270,171 @@ def check_user_in_blacklist(phone_number):
     :return: user object if the id, None if user does not exist
     """
     db = mongo_client.COVIDChatbot_Misconduct
-    query_result = db.COVIDChatbot_Misconduct.find_one({"phone_number": phone_number})
+    query_result = db.COVIDChatbot_Misconduct.find_one({"phone_number": "{}".format("+" + phone_number if not phone_number.startswith("+") else phone_number)})
+    if query_result is not None:
+        return query_result
+    return None
+
+
+def get_handover_volunteers():
+    """
+    get list of volunteers to answer users' queries (handover phone numbers, and language they can speak)
+    :return: list of volunteers, None if no volunteer registered
+    """
+    db = mongo_client.COVIDChatbot_HandoverNumbers
+    query_result = db.COVIDChatbot_HandoverNumbers.find()
+    if query_result is not None:
+        return list(query_result)
+    return None
+
+
+def get_handover_volunteers_by_language(language):
+    """
+    get list of volunteers to answer users' queries for given language
+    :return: list of volunteers, None if no volunteer registered
+    """
+    db = mongo_client.COVIDChatbot_HandoverNumbers
+    query_result = db.COVIDChatbot_HandoverNumbers.find({"languages": language})
+    if query_result is not None:
+        return list(query_result)
+    return None
+
+
+def get_volunteer_details(phone_number):
+    """
+    get volunteer's details
+    :param phone_number: volunteer's phone number
+    :return: volunteer as object, None if volunteer's number does not exist
+    """
+    db = mongo_client.COVIDChatbot_HandoverNumbers
+    query_result = db.COVIDChatbot_HandoverNumbers.find_one({"phone_number": "{}".format("+" + phone_number if not phone_number.startswith("+") else phone_number)})
+    if query_result is not None:
+        return query_result
+    return None
+
+
+def add_handover_volunteer(full_name, phone_number, languages):
+    """
+    add a volunteer to the handover list
+    :param full_name: volunteer's first name and last name
+    :param phone_number: volunteer's phone number
+    :param languages: language(s) the person can speak (answer users' queries) - used for matching purposes
+    :return: True if the operation is successful, None if an error happens
+    """
+    if get_volunteer_details(phone_number) is None:
+        db = mongo_client.COVIDChatbot_HandoverNumbers
+        handover_request_details = {
+            "full_name": full_name,
+            "phone_number": "{}".format("+" + phone_number if not phone_number.startswith("+") else phone_number),
+            "languages": languages,
+            "num_users_answered": 0
+        }
+        collection = db.COVIDChatbot_HandoverNumbers.insert_one(handover_request_details)
+        if str(collection.inserted_id) != "":  # if the request is successfully added to the database
+            return "Volunteer id: {}".format(str(collection.inserted_id))
+        return None
+    else:
+        return "This number is already registered to the list of volunteers!"
+
+
+def add_handover_request(user_phone_number, language):
+    """
+    add user's handover request to the waiting list
+    :param user_phone_number: user phone number
+    :param language: language of user
+    :return: True if the operation is successful, None if an error happens
+    """
+    handover_request = get_handover_request(user_phone_number) # check to see if any handover request from the user is still in the stack
+    if handover_request is None:
+        db = mongo_client.COVIDChatbot_HandoverRequests
+        handover_request_details = {
+            "user_number": "{}".format("+" + user_phone_number if not user_phone_number.startswith("+") else user_phone_number),
+            "language": language,
+            "volunteer_number": None,
+            "status": "WAITING"
+        }
+        collection = db.COVIDChatbot_HandoverRequests.insert_one(handover_request_details)
+        if str(collection.inserted_id) != "":  # if the request is successfully added to the database
+            return str(collection.inserted_id)
+    else:
+        return str(handover_request["_id"])
+
+
+def accept_handover_request(user_phone_number, handovered_phone_number):
+    """
+    add user's handover request to the waiting list
+    :param user_phone_number: user phone number
+    :param handovered_phone_number: phone number of person who accepted to answer user's queries
+    :return: True if the operation is successful, False if an error happens
+    """
+    db = mongo_client.COVIDChatbot_HandoverRequests
+    query_result = db.COVIDChatbot_HandoverRequests.update_one({"user_number": "{}".format("+" + user_phone_number if not user_phone_number.startswith("+") else user_phone_number)},
+                                                               {
+                                                                   "$set": {
+                                                                       "volunteer_number": "{}".format("+" + handovered_phone_number if not handovered_phone_number.startswith("+") else handovered_phone_number),
+                                                                       "status": "OPEN"
+                                                                   }
+                                                               },
+                                                               upsert=False)
+    if query_result.modified_count > 0:
+        return True
+    return False
+
+
+def close_handover_request(user_phone_number):
+    """
+    close user's handover request
+    :param user_phone_number: user phone number
+    :return: True if the operation is successful, False if an error happens
+    """
+    db = mongo_client.COVIDChatbot_HandoverRequests
+    query_result = db.COVIDChatbot_HandoverRequests.update_one({"user_number": "{}".format("+" + user_phone_number if not user_phone_number.startswith("+") else user_phone_number)},
+                                                               {
+                                                                   "$set": {
+                                                                       "status": "CLOSE"
+                                                                   }
+                                                               },
+                                                               upsert=False)
+    if query_result.modified_count > 0:
+        return True
+    return False
+
+
+def reopen_handover_request(user_phone_number):
+    """
+    reopen user's handover request
+    :param user_phone_number: user phone number
+    :return: True if the operation is successful, False if an error happens
+    """
+    db = mongo_client.COVIDChatbot_HandoverRequests
+    query_result = db.COVIDChatbot_HandoverRequests.update_one({"user_number": "{}".format("+" + user_phone_number if not user_phone_number.startswith("+") else user_phone_number)},
+                                                               {
+                                                                   "$set": {
+                                                                       "status": "OPEN"
+                                                                   }
+                                                               },
+                                                               upsert=False)
+    if query_result.modified_count > 0:
+        return True
+    return False
+
+
+def get_handover_request(user_phone_number):
+    """
+    get user handover request
+    :param user_phone_number: user phone number
+    :return: user request object if phone number exist, None if phone  number does not exist
+    """
+    db = mongo_client.COVIDChatbot_HandoverRequests
+    query_result = db.COVIDChatbot_HandoverRequests.find_one({
+        "$and": [
+            {"user_number": "{}".format("+" + user_phone_number if not user_phone_number.startswith("+") else user_phone_number)},
+            {
+                "$or": [{"status": "WAITING"},
+                        {'status': "OPEN"}]
+            }
+        ]
+    })
     if query_result is not None:
         return query_result
     return None
