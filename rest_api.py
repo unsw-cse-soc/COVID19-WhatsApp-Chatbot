@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask
 from flask import request
 from flask import Response
@@ -7,6 +9,7 @@ from pycountry import languages
 import logging
 import configparser
 from controllers import rule_controller
+from controllers import mongo_controller
 import os
 from twilio.rest import Client
 from textblob import TextBlob
@@ -14,7 +17,7 @@ from textblob import TextBlob
 logger = logging.getLogger("REST Server")
 logger.setLevel(logging.INFO)
 # create file handler which logs even debug messages
-log_file_handler = logging.FileHandler(os.path.join(os.path.dirname(__file__),"covid_chatbot.log"))
+log_file_handler = logging.FileHandler(os.path.join(os.path.dirname(__file__), "covid_chatbot.log"))
 log_file_handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s,%(msecs)d - %(name)s - %(levelname)s - %(message)s")
 log_file_handler.setFormatter(formatter)
@@ -92,6 +95,31 @@ def get_swagger():
     return Response(yaml_document, 200)
 
 
+@app.route("/volunteer", methods=["POST"])
+def add_hanover_volunteer():
+    """
+    add volunteer for handovering the conversation
+    :return: json object/error HTTP response
+    """
+    try:
+        content_type = request.content_type
+        if "form-" in content_type:
+            for key in request.form.keys():
+                print("{}:{}".format(key, request.form[key]))
+            full_name = request.form["full_name"]
+            phone_number = request.form["phone_number"]
+            languages = request.form["languages"]
+            if "," in languages:
+                languages = languages.split(",")
+            if len(full_name) == 0 or len(phone_number) == 0 or len(languages) == 0:
+                raise Exception("phone number or/and languages are empty!")
+            result = mongo_controller.add_handover_volunteer(full_name, phone_number, languages)
+            return Response(json.dumps({"message": result}), 200, mimetype="application/json")
+    except Exception as err:
+        logger.error(str(err))
+        return Response(json.dumps(err), 400, mimetype="application/json")
+
+
 @app.route("/ask", methods=["POST"])
 def get_question_answer():
     """
@@ -101,8 +129,8 @@ def get_question_answer():
     try:
         content_type = request.content_type
         if "form-" in content_type:
-            for key in request.form.keys():
-                print("{}:{}".format(key, request.form[key]))
+            # for key in request.form.keys():
+            #     print("{}:{}".format(key, request.form[key]))
             message = request.form["Body"]
             num_media = 0
             if "NumMedia" in request.form.keys():
