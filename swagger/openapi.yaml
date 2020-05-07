@@ -1,20 +1,58 @@
 openapi: 3.0.1
 info:
-  title: Rule-Based Chatbot (COVID-19 Topic)
+  title: COVID-19 Chatbot
   description: This chatbot is designed to answer questions about COVID-19 topic.
-    It is a part of the [Health Safety Army](https://github.com/unsw-cse-soc/HealthSafetyArmy)
-    platform.
-  version: 1.0.1
+    It is a part of the [Health Safety](https://github.com/unsw-cse-soc/HealthSafetyArmy)
+    platform. You can find the source code in github [repo](https://github.com/unsw-cse-soc/COVID19-Chatbot)
+  version: 1.0.2
   contact:
     name: API Development Team
-    url: 'https://github.com/unsw-cse-soc/HealthSafetyArmy'
+    url: 'https://github.com/unsw-cse-soc/COVID19-Chatbot'
     email: shayane.zamani@gmail.com
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 servers:
-- url: http://localhost:5050
+- url: http://localhost:5005
 paths:
+  /volunteer:
+    post:
+      tags:
+      - Endpoint
+      summary: Add volunteer to answer users' questions (handover the conversation to human)
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - full_name
+                - phone_number
+                - languages
+              properties:
+                full_name:
+                  type: string
+                  description: first name and last name
+                phone_number:
+                  type: string
+                  description: phone number of volunteer (e.g. +61...)
+                  default: "+61"
+                languages:
+                  type: array
+                  items:
+                    type: string
+                  description: languages the person can talk (answer user's question)
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
   /ask:
     post:
       tags:
