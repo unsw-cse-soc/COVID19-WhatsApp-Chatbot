@@ -1,4 +1,4 @@
-+ (hi|hey|hello|howdy|heeya*|heya*)
++ (hi|hey|hello|howdy|heeya*|heya*)*
 - Hi 👋☺️\n
 ^ I'm *Covy* from Australia 🇦🇺🦘🐨\n
 ^ I know a lot about _Coronavirus_ 🦠😷 and I can help you learn more about it!\n
@@ -12,3 +12,10 @@
 - Good, thanks 😙
 - I'm fine, happy! 😋
 
++ (bye|goodbye|see you|see ya)*
+- See you 👋️, take care ☺️
+
++ (thanks|thank you|thank)*
+- No worries 🤗
+- Happy to help 😚
+- Your welcome ☺️

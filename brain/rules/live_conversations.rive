@@ -1,4 +1,4 @@
-+ [*](talk to [a] human|talk to [a] person|talk to an actual person|talk to a real person|talk to someone|want [to] talk [to] human|talk [(to|with)] [an] expert|[(handover|give)] [the] conversation [to] human)
++ [*](get an answer from a human|get answer from [a] human|talk to [a] human|talk to [a] person|talk to an actual person|talk to a real person|talk to someone|want [to] talk [to] human|talk [(to|with)] [an] expert|[(handover|give)] [the] conversation [to] human)
 - ^User-Handover-Request=Sure! I am passing the conversation to one of our team members 👨🏻‍💻\nIt may take few minutes...⏳\n\n
 ^ Please also remember you can talk to me at anytime, by simply saying: _*talk to Covy*_ ☺️ {topic=user_initiate_handover}
 
@@ -12,12 +12,11 @@
 
 < topic
 
-+ connect me to user *
++ talk to user *
 - ^Human-Handover-Accepted=Sure! Please wait for the user to start the conversation! 😊=<star>
 
 + handover responseuser *
 - ^Human-Handover-Answer=<star>{topic=random}
 
-+ please block user *
-- ^Human-Report-Abuse=Thank you for reporting this misbehavior 🙏\nI have added this user to our blacklist 😏=<star>
+
 
