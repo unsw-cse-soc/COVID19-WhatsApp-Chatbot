@@ -34,3 +34,8 @@ In order to run the chatbot locally, follow these steps:
     This will start the chatbot on <**host**>:<**port**> defined in config.ini file.
 
 To use REST APIs of the chatbot, open its swagger UI from ```http://<host>:<port>/doc/``` on your browser.
+
+
+How to Contribute
+--------------
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
